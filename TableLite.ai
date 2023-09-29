@@ -1,0 +1,142 @@
+
+
+TableLite::TableLite(&String_16 filename,&int result)
+{
+
+   var char puffer[512];
+   var int i;
+   for(i=0; i < filename.length(); i++){ puffer[i] = filename.getAt(i);}
+   puffer[i] = cast(char,0);
+
+   inline_cpp[[
+      db = NULL;
+      stmt = NULL;
+
+       // Open the database file (if it doesn't exist, it will be created)
+       int rc = sqlite3_open(puffer._array, &db);
+
+       if (rc) {
+          fprintf(stderr, "Can't open database: %s\\n", sqlite3_errmsg(db));
+          result = 0;
+       } 
+       else 
+       {
+          result = 1;
+       }
+   ]]
+  
+}
+     
+int TableLite::prepareStatement(&char sqlCommand[])
+{
+  inline_cpp[[
+
+    // Compile the SQL query
+    if (sqlite3_prepare_v2(db, sqlCommand._array, -1, &stmt, 0) != SQLITE_OK) 
+    {
+        fprintf(stderr, "SQL error: %s\\n", sqlite3_errmsg(db));
+        stmt = NULL;
+        return 0;
+    }
+  ]]
+  return 1;
+}
+
+int TableLite::select()
+{
+  inline_cpp[[
+    if(sqlite3_step(stmt) == SQLITE_ROW) 
+    { 
+       return 1;
+    }
+
+    // Finalize the statement to release resources
+    sqlite3_finalize(stmt);
+    stmt = NULL;
+  ]]
+  return 0;
+}
+
+
+int TableLite::getInt(int column)
+{
+   var int value = -1;
+   inline_cpp[[
+      value = sqlite3_column_int(stmt, column);
+   ]]
+   return value;
+}
+
+void TableLite::getString(int column,&String_16 value)
+{
+   value.clear();
+   inline_cpp[[
+      const unsigned char *valueCS = sqlite3_column_text(stmt, column);
+      if(valueCS != NULL)
+      {
+         char stackPtr[1];
+         int l = strlen((const char*)valueCS);
+         value.ensureCapacity(stackPtr,l+1);
+         for(int i=0; i < l; i++)
+         {
+            value.append(stackPtr,(char)(valueCS[i]));
+         }
+      }
+   ]]
+}
+
+/* execute an 
+    SQL INSERT statement like the following:
+    "INSERT INTO MyTable (ID, Name, Age) VALUES (1, 'John Doe', 30);"
+
+    or an SQL Update
+    or an SQL delete 
+
+    command
+*/
+int TableLite::executeCommand(&String_16 command)
+{
+    var char puffer[32769];
+    if(command.length() > 32768)
+    {
+       var PrintfClass pfc;
+       pfc.fstr("command too long").pr();
+       return -1;
+    }
+    var int i;
+    for(i=0; i < command.length(); i++)
+    { puffer[i] = command.getAt(i);}
+    puffer[i] = cast(char,0);
+
+inline_cpp[[
+    // Execute the SQL statement
+    char *errMessage = 0;
+    int rc = sqlite3_exec(db, puffer._array, 0, 0, &errMessage);
+
+    if (rc != SQLITE_OK) 
+    {
+        fprintf(stderr, "SQL error: %s\\n", errMessage);
+        sqlite3_free(errMessage);
+        return -2;
+    } 
+]]
+  return 1;
+}
+
+ 
+
+void TableLite::close()
+{
+   inline_cpp[[
+      if(stmt != NULL) sqlite3_finalize(stmt);
+      stmt = NULL;
+
+      if(db != NULL) sqlite3_close(db);
+      db = NULL;
+   ]]
+}
+
+TableLite::~TableLite()
+{
+   this.close();
+}

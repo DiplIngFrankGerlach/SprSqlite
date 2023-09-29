@@ -1,0 +1,26 @@
+
+
+/* A wrapper class around sqlite database calls */
+class TableLite
+{
+  inline_cpp[[
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+  ]]
+methods:
+    TableLite(&String_16 filename,&int result);
+
+    int prepareStatement(&char sqlCommand[]);
+     
+    int select(); 
+
+    int getInt(int column);
+
+    void getString(int column,&String_16 value);
+
+    int executeCommand(&String_16 command);
+
+    void close();
+ 
+    ~TableLite();
+};

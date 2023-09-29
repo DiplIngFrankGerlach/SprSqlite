@@ -1,0 +1,81 @@
+
+
+void Main::transactionTest()
+{
+   var String_16 dn("testDaten/tabellen.sqlite");
+   var int erfolg;
+   var TableLite tl(dn,erfolg);
+   var PrintfClass pfc;
+   if(erfolg == 1)
+   {
+       var String_16 bt("BEGIN TRANSACTION;");
+       tl.executeCommand(bt);
+       var String_16 ic;
+       var String_16 name;
+       for(var int i=100; i < 1000000; i++)
+       {
+          ic.clear();
+          name.assign("Otto Nr");
+          name.append(i);
+          ic.append("insert into authors(author_id,author_name) values(");
+          ic.append(i);
+          ic.append(",'");
+          ic.append(name);
+          ic.append("')");
+          tl.executeCommand(ic);
+       }
+       var String_16 et("COMMIT;");
+       tl.executeCommand(et);
+    }
+}
+
+
+int Main::main()
+{ 
+   this.transactionTest();
+   return 1;
+
+   var String_16 dn("testDaten/tabellen.sqlite");
+   var int erfolg = -1;
+   var TableLite tl(dn,erfolg);
+   var PrintfClass pfc;
+   if(erfolg == 1)
+   {
+       
+       var String_16 ic;
+       var String_16 name;
+       for(var int i=100; i < 10000; i++)
+       {
+          ic.clear();
+          name.assign("Otto Nr");
+          name.append(i);
+          ic.append("insert into authors(author_id,author_name) values(");
+          ic.append(i);
+          ic.append(",'");
+          ic.append(name);
+          ic.append("')");
+          tl.executeCommand(ic);
+       }
+       return 1;
+       if(tl.prepareStatement("select author_id, author_name from authors") == 1)
+       {
+           while(tl.select() == 1)
+           {
+               var int id = tl.getInt(0);
+               var String_16 aName;
+               tl.getString(1,aName);
+               pfc.fstr("$ $").sa(id).sa(aName).pr(); 
+           }
+
+           var String_16 insertCmd("insert into authors(author_id,author_name) values(77,'Michael Mustermann')");
+           tl.executeCommand(insertCmd);
+           tl.close();
+           return 1;
+       }
+       
+   }
+   pfc.fstr("Fehler").pr();
+   return 1;
+}
+
+
