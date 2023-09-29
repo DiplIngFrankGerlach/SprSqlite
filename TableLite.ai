@@ -1,5 +1,9 @@
 
 
+/* open an SQLite database file 
+   result == 1 on success
+   result == 0 on fail 
+*/
 TableLite::TableLite(&String_16 filename,&int result)
 {
 
@@ -26,7 +30,11 @@ TableLite::TableLite(&String_16 filename,&int result)
    ]]
   
 }
-     
+    
+/* prepare an SQL SELECT statement 
+    return 1 on success
+    return 0 error
+*/ 
 int TableLite::prepareStatement(&char sqlCommand[])
 {
   inline_cpp[[
@@ -42,6 +50,10 @@ int TableLite::prepareStatement(&char sqlCommand[])
   return 1;
 }
 
+/* iterate through SQL Select Resultset.
+    return 1 on success
+    return 0 when end of result set reached
+*/
 int TableLite::select()
 {
   inline_cpp[[
@@ -57,7 +69,7 @@ int TableLite::select()
   return 0;
 }
 
-
+/* read an integer column of the current result set row */
 int TableLite::getInt(int column)
 {
    var int value = -1;
@@ -67,6 +79,7 @@ int TableLite::getInt(int column)
    return value;
 }
 
+/* read an String column of the current result set row */
 void TableLite::getString(int column,&String_16 value)
 {
    value.clear();
@@ -85,8 +98,7 @@ void TableLite::getString(int column,&String_16 value)
    ]]
 }
 
-/* execute an 
-    SQL INSERT statement like the following:
+/* execute an SQL INSERT statement like the following:
     "INSERT INTO MyTable (ID, Name, Age) VALUES (1, 'John Doe', 30);"
 
     or an SQL Update
@@ -124,7 +136,9 @@ inline_cpp[[
 }
 
  
-
+/* close the connection to the sqlite database file 
+   and release all resource
+*/
 void TableLite::close()
 {
    inline_cpp[[
