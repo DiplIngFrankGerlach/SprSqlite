@@ -48,6 +48,8 @@ compile AppMain.ai
 compile StringUtil.ai  
 compile System.ai  
 compile TableLite.ai
+compile Strings.ai
+compile ZKNuetzlich.ai
 
 
 

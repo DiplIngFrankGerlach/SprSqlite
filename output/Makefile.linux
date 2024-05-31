@@ -5,17 +5,25 @@
 
 OBJECTS= AppMain.o \
 StringUtil.o \
+Strings.o \
 System.o \
 TableLite.o \
 determStackMemory_AppMain.ai.o \
 determStackMemory_StringUtil.ai.o \
 determStackMemory_System.ai.o \
 determStackMemory_TableLite.ai.o \
+determStackMemory_Strings.ai.o \
+determStackMemory_ZKNuetzlich.ai.o \
 determineStackMemoryNeeds.o \
 placementNewClasses_AppMain.ai.o \
 placementNewClasses_StringUtil.ai.o \
 placementNewClasses_System.ai.o \
-placementNewClasses_TableLite.ai.o
+placementNewClasses_TableLite.ai.o \
+placementNewClasses_Strings.ai.o \
+placementNewClasses_ZKNuetzlich.ai.o \
+mapping.o \
+main.o \
+ZKNuetzlich.o
 
 
 
@@ -24,9 +32,9 @@ placementNewClasses_TableLite.ai.o
 $(OBJECTS):header.h
 header.h:mapping.h
 CC = g++
-VPATH=/home/bjafrge/Sappeur4x/ausg/haupt/cppMapping
+VPATH=/home/frank/Sappeur4x/ausg/haupt/cppMapping
 
-INCLUDE=-I/usr/include/unicode -I/home/bjafrge/Sappeur4x/ausg/haupt/cppMapping -I. -I.. 
+INCLUDE=-I/usr/include/unicode -I/home/frank/Sappeur4x/ausg/haupt/cppMapping -I. -I.. 
 
 LDLIBS=-lstdc++  /usr/lib64/libsqlite3.so
 .SUFFIXES: .o .cpp
