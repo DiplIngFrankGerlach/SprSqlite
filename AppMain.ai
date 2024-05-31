@@ -1,4 +1,11 @@
+Import
+{
+   "Strings.ad",
+   "System.ad",
+   "TableLite.ad",
+   "AppMain.ad"
 
+}
 
 void Main::transactionTest()
 {

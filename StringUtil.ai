@@ -1,3 +1,11 @@
+Import
+{
+   "Strings.ad",
+   "System.ad",
+   "StringUtil.ad",
+   "ZKNuetzlich.ad"
+}
+
 
 /*entferne Leerzeichen links und rechts */
 void StringUtil::trim(&String_16 eingabe,&String_16 ausgabe)
@@ -62,6 +70,17 @@ void StringUtil::vergleichGK(&String_16 s1,&String_16 s2,&int ergebnis)
    }
    ergebnis = 1;
 }
+
+void StringUtil::appendDouble(double x,&String_16 ausgabe,int anzStellen)
+{
+    var char puffer[31];
+    inline_cpp[[
+       snprintf(puffer._array,30,"%f",x); 
+    ]]
+    for(var int i=0; (i < anzStellen) && (puffer[i] != '\0');i++)
+    {ausgabe.append(puffer[i]); }
+}
+
 
 void StringUtil::UnitTest()
 {

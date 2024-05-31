@@ -1,4 +1,9 @@
-
+Import
+{
+  "Strings.ad",
+  "System.ad",
+  "TableLite.ad"
+  }
 
 /* open an SQLite database file 
    result == 1 on success

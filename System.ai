@@ -1,6 +1,8 @@
-
-//File Version:2.1
-   
+Import{
+  "Strings.ad",
+  "System.ad",
+  "AlphabeticSorter.ad"
+} 
     
 ThreadInfo::ThreadInfo()
 {
@@ -55,6 +57,39 @@ void ThreadInfo::join()
    var char buffer[2];
    buffer[0]=c;
    buffer[1]='\0';
+   this.sa(buffer);
+   return thisref;
+}
+
+
+&PrintfClass PrintfClass::saHex(char c)
+{
+   var char buffer[3];
+   var int n = cast(int ,c);
+   n = n & 0xFF;
+   inline_cpp[[
+      snprintf(buffer._array,3,"%.2x",n);
+   ]]
+   this.sa(buffer);
+   return thisref;
+}
+
+&PrintfClass PrintfClass::saHex(longlong number)
+{
+   var char buffer[17];
+   inline_cpp[[
+      snprintf(buffer._array,17,"%.16llx",(unsigned long long)number);
+   ]]
+   this.sa(buffer);
+   return thisref;
+}
+
+&PrintfClass PrintfClass::saHex(int number)
+{
+   var char buffer[9];
+   inline_cpp[[
+      snprintf(buffer._array,9,"%.8x",number);
+   ]]
    this.sa(buffer);
    return thisref;
 }
@@ -131,7 +166,7 @@ void ThreadInfo::join()
 {
    var char buf[32];
    inline_cpp[[
-      snprintf(buf._array,32,"%f",num);
+      snprintf(buf._array,32,"%.9g",num);
    ]]
    this.sa(buf);
    return thisref;
@@ -141,7 +176,7 @@ void ThreadInfo::join()
 {
    var char buf[32];
    inline_cpp[[
-      snprintf(buf._array,32,"%.10f",num);
+      snprintf(buf._array,32,"%.17g",num);
    ]]
    this.sa(buf);
    return thisref;
@@ -403,18 +438,27 @@ int SPRFile::write(int pos,int count,*char buffer[])
 //write 'count' bytes at position 'pos' into 'buffer'
 //returns the number of bytes actually written, if successful
 //        a negative number if an error occured
-   
+
 int SPRFile::write64(longlong pos,int count,&char buffer[])
 {
    if(_handle<0){return _handle;}
    var int ret;
    var int oktetsGeschrieben = 0;
    inline_cpp[[
+     
+     #ifdef __CYGWIN__
+     if(::lseek(_handle,(off_t)pos,SEEK_SET)!=pos)
+     {
+        perror("SPRFile::write64()/lseek");
+        return -1;
+     }
+     #else
      if(::lseek64(_handle,pos,SEEK_SET)!=pos)
      {
         perror("SPRFile::write64()/lseek");
         return -1;
      }
+     #endif
      while(oktetsGeschrieben < count )
      {
         ret=_write(_handle,buffer._array,count);
@@ -424,7 +468,7 @@ int SPRFile::write64(longlong pos,int count,&char buffer[])
         }
         else { return -1;}
      }
-   ]]      
+   ]]
    return oktetsGeschrieben;
 }
 
@@ -897,31 +941,22 @@ void AlphabeticSorter::test()
     }
 }
 
-
-
-
-
-
 longlong SystemTime::getMillisecondCounter()
 {
     var longlong ms;
-    inline_cpp[[   	 
-   	int iMilliSeconds; 
-                #ifdef WIN32_X86
-   	_timeb tSysTime;
-   	_ftime(&tSysTime); 
-                #else
-                 timeb tSysTime; 
-                 ftime(&tSysTime);
-                #endif
-   	ms = tSysTime.time; 
-   	iMilliSeconds = tSysTime.millitm; 
-   	ms *= 1000; 
-   	ms += iMilliSeconds; 		
-    ]]   
-    return ms; 
-}
+    inline_cpp[[
+       struct timeval currentTime;
+       gettimeofday(&currentTime, NULL);
 
+       // Extract seconds and microseconds
+       time_t seconds = currentTime.tv_sec;
+       suseconds_t microseconds = currentTime.tv_usec;
+       ms = seconds;
+       ms = ms * 1000;
+       ms = ms + (microseconds / 1000);
+    ]]
+    return ms;
+}
 
 int CommandlineArgs::numberOfArguments()
 {
@@ -1081,7 +1116,13 @@ void SystemControl::exit()
 
 void SystemControl::uSleep(int microSeconds)
 {
-   inline_cpp[[::usleep(microSeconds);]]
+   inline_cpp[[
+      #ifndef __CYGWIN__
+         ::usleep(microSeconds);
+      #else
+         cout << "SystemControl::uSleep() not implemented on cygwin" << endl;
+      #endif
+   ]]
 }
 
 void SystemControl::exitError(&char message[])
@@ -1325,3 +1366,33 @@ void Benutzer_Umschalter::UnitTest()
      pfc.fstr("Benutzer_Umschalter::UnitTest() Fehler 2").pr();
    }
 }
+
+
+void Umgebung::leseVariable(&String_16 varNameStr,&int erfolg, &String_16 wertStr)
+{
+   erfolg = 0;
+   inline_cpp[[
+       char varName[300];
+       char sp('x');
+       int j=0;
+       while( (j < 299) && ( j < varNameStr.length(&sp) ) ) 
+       { 
+          varName[j] = varNameStr.getAt(&sp,j);
+          j++;
+       }
+       varName[j] = '\\0';
+       const char* wert = getenv(varName);
+       if( wert != NULL)
+       {
+          int i=0;
+          while( (i < 1000) && (wert[i] != '\\0') )
+          {
+             wertStr.append(&sp,wert[i]);
+             i++;
+          } 
+          if( i < 1000){ erfolg = 1; }
+          else { erfolg = 0; }
+       }
+   ]]
+}
+

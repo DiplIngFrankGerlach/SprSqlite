@@ -1,155 +1,30 @@
 
 
 
-
-
-generative_function[String](preallocSize)[[
-
-    class dllexport_a String_@preallocSize@
-    {
-        char _preAllocBuf[@preallocSize@];
-        *char _extendedBuf[];
-        int _length;
-
-    methods:
-
-        String_@preallocSize@();
-        String_@preallocSize@(&char init[]);
-        void print();
-        void printNoLF();
-        void append(&char str[]);
-        void append(&char str[],int pos,int anzahl);
-        void append(*char buf[]);
-        void append(&String_@preallocSize@ other);
-        void append(String_@preallocSize@* other);
-        void append(char c);
-        void append(int x);
-        void append(double d);
-        void append(longlong l);
-        void appendKurz(double d);
-        void appendHexOctet(int x);
-        void appendHex(longlong x);
-        thisreturn void append(longlong x,int base);
-
-        void assign(&char str[]);
-        void assign(char zeichen);
-
-        void assign(&String_@preallocSize@ anderer);
-        void assign(String_@preallocSize@* anderer);
- 
-        char getAt(int x);
-        void setAt(int stelle, char zeichen);
-
-        int capacity();
-        int length();
-        void clear();
-        void clearAndReclaimMemory();
-        int lengthOf(&char str[]);
-
-        int compare(&char str[]);
-
-        int compare(&String_@preallocSize@ other);
-   
-
-        thisreturn void getKey(String_@preallocSize@* key);
-
-        int getHashCode();
-
-
-        void getExtendedBuf(*char extendedBuf[]);
-
-        int equals(&String_@preallocSize@ other);
-
-        int equals(&char other[]);
-
-        void toCharArray(&char feld[]);
-
-        int asNumber();
-
-        int asNumber(int radix);
-
-        longlong asNumberLL(int radix);
-
-        double asDouble();
-
-        void escape(&String_@preallocSize@ escaped,char escape);
-
-        void deEscape(&String_@preallocSize@ deescaped,char escape);
-
-        int endsWith(&char end[]);
-
-        int endsWith(&String_@preallocSize@ str2);
-
-        void rightOf(char divider,&String_@preallocSize@ oStr);
-
-        int startsWith(&char buf[]);
-
-        void subString(&String_@preallocSize@ oStr,int start, int end);
-
-        ~String_@preallocSize@();
-
-        static int isNumberChar(char c);
-
-        int hashCode();
-
-        void ersetzen(&String_@preallocSize@ alt,&String_@preallocSize@ neu,&String_@preallocSize@ ergebnis);
-
-        void unitTest();
-
-        int teileAuf(*String_@preallocSize@ spalten[],char trenner);
-
-        void wandleKleinbuchstaben();
-
-        void wandleUmlaute(&String_@preallocSize@ ziel );
-       
-        void ensureCapacity(int minCapacity);
-
+define(StringsImpl, 
         
-
-        //int contains(&String substring);
-    };
- 
-    //Adapter Class for Hashing with SPHT
-    class Hash_String_@preallocSize@
-    {
-       methods:
-         static int hash(&String_@preallocSize@ str);
-    };
-
-    //Adapter class for comparison in SPHT
-    class Compare_String_@preallocSize@
-    {
-       methods:
-         static int compare(&String_@preallocSize@ s1,&String_@preallocSize@ s2);
-    };
-
-    class Assigner_String_@preallocSize@
-    {
-      methods:
-         static void assign(&String_@preallocSize@ s1,&String_@preallocSize@ s2);
-    };
-
-
-]]
-
-
-[[
-
-        String_@preallocSize@::String_@preallocSize@(&char init[])
+        String_$1::String_$1(&char init[])
         {
            _length=0;
-           _preAllocBuf[0] = '\\0';
+           _preAllocBuf[0] = '\0';
            this.append(init);
         }
-        //Baustelle
-        String_@preallocSize@::String_@preallocSize@()
+
+        String_$1::String_$1(&String_$1 other)
         {
            _length=0;
-           _preAllocBuf[0] = '\\0';
+           _preAllocBuf[0] = '\0';
+           this.append(other);
+        }
+
+        String_$1::String_$1()
+        {
+           _length=0;
+           _preAllocBuf[0] = '\0';
            this.append("");
         }
 
-        int String_@preallocSize@::capacity()
+        int String_$1::capacity()
         {
            if( _extendedBuf   != NULL)
            {
@@ -157,8 +32,8 @@ generative_function[String](preallocSize)[[
            }
            return _preAllocBuf.sz;
         }
-
-        int String_@preallocSize@::teileAuf(*String_@preallocSize@  spalten[],char trenner)
+        
+        int String_$1::teileAuf(*String_$1  spalten[],char trenner)
         {
             var int stelle=0;
             var int ausgStelle = 0;
@@ -188,13 +63,13 @@ generative_function[String](preallocSize)[[
             return 0;
         }
 
-        void String_@preallocSize@::getKey(String_@preallocSize@* key)
+        void String_$1::getKey(String_$1* key)
         {
           key = this;
         }
 
-        // return 1 if strings are equal, return 0 if not 
-        int String_@preallocSize@::compare(&String_@preallocSize@ other)
+        // return 1 if strings are equal komma return 0 if not 
+        int String_$1::compare(&String_$1 other)
         {
            if( this.length() == other.length() )
            {
@@ -215,71 +90,53 @@ generative_function[String](preallocSize)[[
 
            return 1;
         }
-
-        void String_@preallocSize@::append(*char buf[])
+        
+        double String_$1::asDouble()
         {
-             var int groesse=0;
-             while(buf[groesse] != '\\0')
-             {groesse++;}
+            if(this.length() > 301)
+            { 
+               var double notAnum;
+               inline_cpp[[ notAnum = NAN; ]]
+               return notAnum; 
+            }
 
-             this.ensureCapacity( _length + groesse );
-             var int stelle;
-             for(stelle = 0; stelle < groesse; stelle++)
-             {
-                 this.append(buf[stelle]);
-             }
-        }
-
-        double String_@preallocSize@::asDouble()
-        {
             var double ret;
-            this.ensureCapacity( _length + 1);
-            if(_extendedBuf != NULL)
-            {
-               _extendedBuf[_length] = cast(char,0);
-               inline_cpp\[\[
-     
-                 ret=atof(_extendedBuf._theObject->_array);
-               \]\]
-            }
-            else
-            {
-               _preAllocBuf[_length] = cast(char,0);
-               inline_cpp\[\[
-                 ret=atof(_preAllocBuf._array);
-               \]\]
-            }
+            var char puffer[301];
+            this.toCharArray(puffer);
+            inline_cpp[[
+               ret=atof(puffer._array);
+            ]]
             return ret;
         }
 
-        void String_@preallocSize@::assign(&char str[])
+        void String_$1::assign(&char str[])
         {
            this.clear();
            this.append(str);
         }
-        void String_@preallocSize@::assign(char zeichen)
+        void String_$1::assign(char zeichen)
         {
            this.clear();
            this.append(zeichen);
         }
 
-        void String_@preallocSize@::assign(&String_@preallocSize@ anderer)
+        void String_$1::assign(&String_$1 anderer)
         {
            this.clear();
            this.append(anderer);
         }
 
-        void String_@preallocSize@::assign(String_@preallocSize@* anderer)
+        void String_$1::assign(String_$1* anderer)
         {
            this.clear();
            this.append(anderer);
         }
 
 
-        void String_@preallocSize@::append(&char str[])
+        void String_$1::append(&char str[])
         {
              var int groesse=0;
-             while(str[groesse] != '\\0')
+             while(str[groesse] != '\0')
              {groesse++;}
 
              this.ensureCapacity( _length + groesse );
@@ -289,9 +146,8 @@ generative_function[String](preallocSize)[[
                  this.append(str[stelle]);
              }
         }
-
-
-        void String_@preallocSize@::append(&char str[],int pos,int anzahl)
+        
+        void String_$1::append(&char str[],int pos,int anzahl)
         {
            for(var int i=0;i<anzahl;i++)
            {
@@ -299,25 +155,25 @@ generative_function[String](preallocSize)[[
            }
         }
 
-        void String_@preallocSize@::append(double d)
+        void String_$1::append(double d)
         {
-            var char puffer[30];
-            inline_cpp\[\[
-                snprintf(puffer._array,30,"%lf",d);
-            \]\]
+            var char puffer[31];
+            inline_cpp[[
+                snprintf(puffer._array,30,"%.10e",d);
+            ]]
             this.append(puffer);
         }
 
-        void String_@preallocSize@::appendKurz(double d)
+        void String_$1::appendKurz(double d)
         {
-            var char puffer[30];
-            inline_cpp\[\[
-                snprintf(puffer._array,30,"%3.2lf",d);
-            \]\]
+            var char puffer[301];
+            inline_cpp[[
+                snprintf(puffer._array,300,"%3.2lf",d);
+            ]]
             this.append(puffer);
         }
 
-        void String_@preallocSize@::append(longlong l, int basis)
+        void String_$1::append(longlong l, int basis)
         {
               var String_16 zk16;
               ZKNuetzlich::wandle(l,basis,zk16);
@@ -328,51 +184,51 @@ generative_function[String](preallocSize)[[
               }
         }
 
-        int String_@preallocSize@::length()
+        int String_$1::length()
         {
            var int i=0;
            return _length;
         }
 
-        void String_@preallocSize@::print()
+        void String_$1::print()
         {
            this.printNoLF();
-           inline_cpp[[ ::printf("\\\\n"); \]]
+           inline_cpp[[ ::printf("\\n"); ]]
         }
 
-        void String_@preallocSize@::printNoLF()
+        void String_$1::printNoLF()
         {
             this.ensureCapacity(_length + 1);
             if(_extendedBuf == NULL)
             {
-               _preAllocBuf[_length]='\\0';
-               inline_cpp[[::printf("%s",_preAllocBuf._array);\]]
+               _preAllocBuf[_length]='\0';
+               inline_cpp[[::printf("%s",_preAllocBuf._array);]]
             }
             else
             {
-              _extendedBuf[_length]='\\0';
-               inline_cpp[[::printf("%s",_extendedBuf._theObject->_array);\]]
+              _extendedBuf[_length]='\0';
+               inline_cpp[[::printf("%s",_extendedBuf._theObject->_array);]]
             }
         }
 
-        int String_@preallocSize@::lengthOf(&char str[])
+        int String_$1::lengthOf(&char str[])
         {
            var int l=0;
-           while(str[l] !='\\0')
+           while(str[l] !='\0')
            {
               l=l+1;
            }
            return l;
         }
 
-        void String_@preallocSize@::clear()
+        void String_$1::clear()
         {
             _length=0;
-            if(_extendedBuf != NULL){_extendedBuf[0]='\\0';}
-            _preAllocBuf[0]='\\0';
+            if(_extendedBuf != NULL){_extendedBuf[0]='\0';}
+            _preAllocBuf[0]='\0';
         }
 
-        void String_@preallocSize@::append(&String_@preallocSize@ other)
+        void String_$1::append(&String_$1 other)
         {
              var int groesse=other.length();
 
@@ -385,19 +241,19 @@ generative_function[String](preallocSize)[[
         }
 
 
-        void String_@preallocSize@::clearAndReclaimMemory()
+        void String_$1::clearAndReclaimMemory()
         {
            _length=0;
            _extendedBuf=NULL;
-           _preAllocBuf[0]='\\0';
+           _preAllocBuf[0]='\0';
           
         }
 
-        // return 1 if strings are equal, return 0 if not 
-        int String_@preallocSize@::compare(&char str[])
+        // return 1 if strings are equal komma return 0 if not 
+        int String_$1::compare(&char str[])
         {
             var int i=0;
-            while((i < str.sz) && (str[i] != '\\0') && (i < _length) )
+            while((i < str.sz) && (str[i] != '\0') && (i < _length) )
             {
                if( this.getAt(i) != str[i] )
                {
@@ -414,11 +270,11 @@ generative_function[String](preallocSize)[[
 
         
 
-        void String_@preallocSize@::append(char c)
+        void String_$1::append(char c)
         {
            if(_extendedBuf == NULL)
            {
-              if( @preallocSize@ <= _length )
+              if( $1 <= _length )
               {
                 this.ensureCapacity( _length * 2);
                 _extendedBuf[_length] = c;
@@ -442,7 +298,7 @@ generative_function[String](preallocSize)[[
            
         }
 
-        char String_@preallocSize@::getAt(int i)
+        char String_$1::getAt(int i)
         {
             if(_extendedBuf != NULL)
             {
@@ -455,7 +311,7 @@ generative_function[String](preallocSize)[[
             return '\0';//dummy
         }
 
-        void String_@preallocSize@::setAt(int stelle, char zeichen)
+        void String_$1::setAt(int stelle, char zeichen)
         {
             if(_extendedBuf != NULL)
             {
@@ -467,18 +323,18 @@ generative_function[String](preallocSize)[[
             }
         }
 
-        void String_@preallocSize@::getExtendedBuf(*char extendedBufRet[])
+        void String_$1::getExtendedBuf(*char extendedBufRet[])
         {
            extendedBufRet=_extendedBuf;
         }
 
-        String_@preallocSize@::~String_@preallocSize@()
+        String_$1::~String_$1()
         {
             _extendedBuf=NULL;
             _length= - 13;
         }
 
-        void String_@preallocSize@::rightOf(char divider,&String_@preallocSize@ oStr)
+        void String_$1::rightOf(char divider,&String_$1 oStr)
         {
            var int zeiger = this.length() - 1;
            var int fertig = 0;
@@ -502,7 +358,7 @@ generative_function[String](preallocSize)[[
         }
 
         //ret == 1 if equal; ret==0 if not equal
-        int String_@preallocSize@::equals(&String_@preallocSize@ other)
+        int String_$1::equals(&String_$1 other)
         {
            var int equal=0;
            var int l=this.length();
@@ -518,10 +374,10 @@ generative_function[String](preallocSize)[[
            return 1;
         }
 
-        int String_@preallocSize@::equals(&char other[])
+        int String_$1::equals(&char other[])
         {
            var int lother=0;
-           while((lother<other.sz) && (other[lother] != '\\0'))
+           while((lother<other.sz) && (other[lother] != '\0'))
            {
               lother++;
            }
@@ -535,44 +391,58 @@ generative_function[String](preallocSize)[[
            return 1;
         }
 
-        void String_@preallocSize@::append(String_@preallocSize@* other)
+        void String_$1::append(String_$1* other)
         {
             for(var int i=0;i<other.length();i++)
             {
                 this.append(other.getAt(i));
             }
         }
-        void String_@preallocSize@::append(int x)
+        void String_$1::append(int x)
         {
             var longlong xLL = cast(longlong,x);
             this.append(x,10);
         }
 
-        void String_@preallocSize@::appendHexOctet(int x)
+        void String_$1::appendHexOctet(int x)
         {
            var char buf[16];
-           buf[0]='\\0';
-           inline_cpp[[ snprintf(buf._array,16,"%.2x",x); \]]
+           buf[0]='\0';
+           inline_cpp[[ snprintf(buf._array,16,"%.2x",x); ]]
            this.append(buf);
         }
 
-        void String_@preallocSize@::appendHex(longlong x)
+        void String_$1::appendHex(longlong x)
         {
             this.append(x,16);
         }
-        void String_@preallocSize@::append(longlong x)
+        void String_$1::append(longlong x)
         {
             this.append(x,10);
         }
 
+        void String_$1::append(*char buf[])
+        {
+             var int groesse=0;
+             while(buf[groesse] != '\0')
+             {groesse++;}
+
+             this.ensureCapacity( _length + groesse );
+             var int stelle;
+             for(stelle = 0; stelle < groesse; stelle++)
+             {
+                 this.append(buf[stelle]);
+             }
+        }
 
 
-        void String_@preallocSize@::toCharArray(&char feld[])
+
+        void String_$1::toCharArray(&char feld[])
         {
             var int szm1=feld.sz - 1;
             if(szm1<this.length())
             {
-               feld[0]='\\0';
+               feld[0]='\0';
                return;
             }
             var int i=0;
@@ -580,15 +450,15 @@ generative_function[String](preallocSize)[[
             {
                feld[i]=this.getAt(i);
             }
-            feld[i]='\\0';
+            feld[i]='\0';
         }
 
-        int String_@preallocSize@::asNumber()
+        int String_$1::asNumber()
         {
             return this.asNumber(10);
         }
 
-        int String_@preallocSize@::asNumber(int radix)
+        int String_$1::asNumber(int radix)
         {
             var int ret=0;
             var int isNegative=0;
@@ -624,7 +494,7 @@ generative_function[String](preallocSize)[[
             return ret;
         }
 
-        longlong String_@preallocSize@::asNumberLL(int radix)
+        longlong String_$1::asNumberLL(int radix)
         {
             var longlong ret=0;
             var int isNegative=0;
@@ -660,7 +530,7 @@ generative_function[String](preallocSize)[[
             return ret;
         }
 
-        void String_@preallocSize@::escape(&String_@preallocSize@ escaped,char escape)
+        void String_$1::escape(&String_$1 escaped,char escape)
         {
            for(var int i=0;i<this.length();i++)
            {
@@ -677,7 +547,7 @@ generative_function[String](preallocSize)[[
            }
         }
 
-        void String_@preallocSize@::deEscape(&String_@preallocSize@ deescaped,char escape)
+        void String_$1::deEscape(&String_$1 deescaped,char escape)
         {
             for(var int i=0;i<this.length();i++)
             {
@@ -694,10 +564,10 @@ generative_function[String](preallocSize)[[
             }
         }
 
-        int String_@preallocSize@::endsWith(&char end[])
+        int String_$1::endsWith(&char end[])
         {
             var int j=0;
-            while((end[j] != '\\0') && (j<end.sz) ){j++;}
+            while((end[j] != '\0') && (j<end.sz) ){j++;}
             if(j<=0)
             {
                return  - 1;
@@ -717,7 +587,7 @@ generative_function[String](preallocSize)[[
             return 1;
         }
 
-        int String_@preallocSize@::endsWith(&String_@preallocSize@ str2)
+        int String_$1::endsWith(&String_$1 str2)
         {
             if(str2.length()>this.length()){return 0;}
             var int p=str2.length() - 1;
@@ -730,12 +600,12 @@ generative_function[String](preallocSize)[[
             return 1;
         }
 
-        int String_@preallocSize@::startsWith(&char buf[])
+        int String_$1::startsWith(&char buf[])
         {
            var int l=this.lengthOf(buf);
            var int i=0;
            if(l>this.length()){return 0;}
-           while((i<l) && (buf[i] != '\\0'))
+           while((i<l) && (buf[i] != '\0'))
            {
               if(this.getAt(i) != buf[i])
               {return 0;}
@@ -745,16 +615,15 @@ generative_function[String](preallocSize)[[
         }
 
 
-        void String_@preallocSize@::subString(&String_@preallocSize@ oStr,int start, int end)
+        void String_$1::subString(&String_$1 oStr,int start, int end)
         {
            for(var int i=start;i<=end;i++)
            {
               oStr.append(this.getAt(i));
            }
         }
-
-
-        int String_@preallocSize@::isNumberChar(char c)
+        
+        int String_$1::isNumberChar(char c)
         {
             switch(c)
             {
@@ -766,25 +635,70 @@ generative_function[String](preallocSize)[[
             return 0;
         }
 
-        int String_@preallocSize@::hashCode()
+        int String_$1::hashCode()
         {
-            var int hc;
-            if(_extendedBuf == NULL)
-            {
-               inline_cpp[[ 
-                 hc = suchoi(_preAllocBuf._array,_length);
-               \]]
-            }
-            else
-            {
-               inline_cpp[[ 
-                 hc = suchoi(_extendedBuf._theObject->_array,_length);
-               \]]
-            }
-            return hc;
+            var longlong h = this.hashCodeLL();
+            h = h ^ (h >> 32);
+            return cast(int,h);
         }
 
-        void String_@preallocSize@::wandleKleinbuchstaben()
+        longlong String_$1::hashCodeLL()
+        {
+            var longlong c1 =  0x9876543287654321;
+
+            //PI =            0x3.243f6a8885a308d313198a2e03707344a4093822299f31d0082efa98ec4e6c89
+            var longlong cPI  = 0x3243f6a8885a308d;
+            var longlong cPI2 = 0x313198a2e0370734;
+            var longlong cPI3 = 0xa4093822299f31d0;
+
+            //Euler = 2.7182818284 5904523536 0287471352 6624977572 4709369995 9574966967 6277240766
+            //         3035354759 4571382178 5251664274 2746639193 2003059921 8174135966
+
+            var longlong cE1 = 0x2718281828459045;
+            var longlong cE2 = 0x5235360287471352;
+            var longlong cE3 = 0x6624977572470936;
+
+            var longlong state = cE3;
+
+            var int l = this.length();
+
+            var int ld8 = l / 8;
+            var int ld8m8 = ld8 * 8;
+            for(var int i=0; i < ld8m8; i = i + 8)
+            {
+               var longlong  zeichen =
+                                   cast(longlong,this.getAt(i    )); zeichen = zeichen << 8;
+               zeichen = zeichen + cast(longlong,this.getAt(i + 1)); zeichen = zeichen << 8;
+               zeichen = zeichen + cast(longlong,this.getAt(i + 2)); zeichen = zeichen << 8;
+               zeichen = zeichen + cast(longlong,this.getAt(i + 3)); zeichen = zeichen << 8;
+               zeichen = zeichen + cast(longlong,this.getAt(i + 4)); zeichen = zeichen << 8;
+               zeichen = zeichen + cast(longlong,this.getAt(i + 5)); zeichen = zeichen << 8;
+               zeichen = zeichen + cast(longlong,this.getAt(i + 6)); zeichen = zeichen << 8;
+               zeichen = zeichen + cast(longlong,this.getAt(i + 7));
+               //spreize den Input auf 64 bit auf
+               zeichen =  (zeichen * c1) ^ (zeichen * cE2) ;
+               state = (state ^ zeichen) ;
+               var longlong t1 = (state << 17) | (state >> 47);
+               var longlong t2 = (state << 34) | (state >> 30);
+               var longlong t3 = (state << 44) | (state >> 20);
+               state = (state * cPI) ^ ( t1 * cPI2) ^ ( t2 * cPI3) ^ (t3 * cE1);
+            }
+            var int stelle8 = ld8 * 8;
+            for(var int i=stelle8; i < l; i = i + 1)
+            {
+               var longlong  zeichen = cast(longlong,this.getAt(i)); zeichen = zeichen << 8;
+               //spreize den Input auf 64 bit auf
+               zeichen =  (zeichen * c1) ^ (zeichen * cE2) ;
+               state = (state ^ zeichen) ;
+               var longlong t1 = (state << 17) | (state >> 47);
+               var longlong t2 = (state << 34) | (state >> 30);
+               var longlong t3 = (state << 44) | (state >> 20);
+               state = (state * cPI) ^ ( t1 * cPI2) ^ ( t2 * cPI3) ^ (t3 * cE1);
+            }
+            return state;
+        }
+
+        void String_$1::wandleKleinbuchstaben()
         {
             var int i;
             for(i=0; i < this.length(); i++)
@@ -800,12 +714,12 @@ generative_function[String](preallocSize)[[
         }
 
      
-        int String_@preallocSize@::getHashCode()
+        int String_$1::getHashCode()
         {
           return this.hashCode();
         }
 
-        void String_@preallocSize@::wandleUmlaute(&String_@preallocSize@ ausgabe)
+        void String_$1::wandleUmlaute(&String_$1 ausgabe)
         {
             var int i=0;
              
@@ -822,9 +736,9 @@ generative_function[String](preallocSize)[[
             }
         }
         
-        void String_@preallocSize@::ensureCapacity(int minCapacity)
+        void String_$1::ensureCapacity(int minCapacity)
         {
-            if(@preallocSize@ < minCapacity)    
+            if($1 < minCapacity)    
             {
                if( _extendedBuf == NULL ) 
                {
@@ -853,12 +767,12 @@ generative_function[String](preallocSize)[[
         }
 
 
-        int Hash_String_@preallocSize@::hash(&String_@preallocSize@ str)
+        int Hash_String_$1::hash(&String_$1 str)
         {
             return str.getHashCode();
         }
 
-        int Compare_String_@preallocSize@::compare(&String_@preallocSize@ s1,&String_@preallocSize@ s2)
+        int Compare_String_$1::compare(&String_$1 s1,&String_$1 s2)
         {
             if(s1.equals(s2) == 1)
             {
@@ -867,102 +781,15 @@ generative_function[String](preallocSize)[[
             return 0;
         }
 
-        void Assigner_String_@preallocSize@::assign(&String_@preallocSize@ s1,&String_@preallocSize@ s2)
+        void Assigner_String_$1::assign(&String_$1 s1,&String_$1 s2)
         {
            s1.clear();
            s1.append(s2);
         }
 
-
-]]
-
-
-class FGString{
-   generate String("16");
-   generate String("32");
-   generate String("64");
-   generate String("128");
    
-  String_16 _content;
 
-  methods:
-  FGString(&char init[]);
+)
 
-  void append(&char str[]);
-  void print();
-
-  int compare(&char str[]);
-
-
-};
-
-
-class dllexport_a AlphaEntry{
-   char _c;
-   int _order;
-   methods:
-   AlphaEntry();
-};
-
-
-class AlphabeticSorter
-{
-   AlphaEntry _alphabet[36];
-  methods:
-   AlphabeticSorter();
-   int isBelow(&char a[],&char b[]);
-   int isBelow(String_16* a,String_16* b);
-
-
-   int isBelow(String_16* wordlist[],int index,String_16* pivot);
-
-   int isAbove(String_16* wordlist[],int index,String_16* pivot);
-
-   int ordinal(char c);
-
-   void qsort(String_16* wordlist[],int lower, int upper);
-
-   void qsort(&int liste[],int start,int end);
-
-   int elemAt(&int liste[],int pos);
-
-   int elemAt(String_16* liste[],int pos);
-
-   int isAboveOrEqualPivot (String_16* liste[],int pos,String_16* pivot);
-
-   int isBelowOrEqualPivot (String_16* liste[],int pos,String_16* pivot);
-
-   void test();
-};
-
-
-class StringUnitTest
-{
-methods:
-    void run();
-};
-
-
-class Wandler
-{
-methods:
-    static int ZeichenNachZiffer(char z);
-    static double alsDouble(&String_16 zk);
-};
-
-/* eine Neutzliche Klasse fuer Zeichenketten */
-class ZKNuetzlich
-{
-methods:
-    int istLeerzeichen(char c);
-    int istZiffer(char z);
-    static void appendInAnfz(&String_16 zk,int x);
-
-    static void wandle(longlong zahl,int basis,&String_16 ziel);
-
-    static void UnitTest(&int ergebnis);
-
-    static void strNachLonglong(&String_16 eingabe,&longlong zeitstempel);
-};
-
-
+StringsImpl(16)
+StringsImpl(128)

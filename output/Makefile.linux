@@ -3,20 +3,30 @@
 #please rename this file. It will be overwritten on the
 #next sappeur compiler run.
 
-OBJECTS=placementNew.o staticData.o determStackMemory.o suchoi.o String.o TableLite.o System.o StringUtil.o AppMain.o generative_impls.o mapping.o main.o threadFunctions.o
-String.o:String.cpp
-TableLite.o:TableLite.cpp
-System.o:System.cpp
-StringUtil.o:StringUtil.cpp
-AppMain.o:AppMain.cpp
+OBJECTS= AppMain.o \
+StringUtil.o \
+System.o \
+TableLite.o \
+determStackMemory_AppMain.ai.o \
+determStackMemory_StringUtil.ai.o \
+determStackMemory_System.ai.o \
+determStackMemory_TableLite.ai.o \
+determineStackMemoryNeeds.o \
+placementNewClasses_AppMain.ai.o \
+placementNewClasses_StringUtil.ai.o \
+placementNewClasses_System.ai.o \
+placementNewClasses_TableLite.ai.o
+
+
+
 
 
 $(OBJECTS):header.h
 header.h:mapping.h
 CC = g++
-VPATH=/home/frank/Sappeur30/haupt//cppMapping
+VPATH=/home/bjafrge/Sappeur4x/ausg/haupt/cppMapping
 
-INCLUDE=-I/usr/include/unicode -I/home/frank/Sappeur30/haupt//cppMapping -I. -I.. 
+INCLUDE=-I/usr/include/unicode -I/home/bjafrge/Sappeur4x/ausg/haupt/cppMapping -I. -I.. 
 
 LDLIBS=-lstdc++  /usr/lib64/libsqlite3.so
 .SUFFIXES: .o .cpp

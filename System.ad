@@ -38,6 +38,12 @@ methods:
    &PrintfClass sa(int num,int base, int numChars);
 
    &PrintfClass sa(longlong num);
+
+   &PrintfClass saHex(char oktet);
+
+   &PrintfClass saHex(longlong number);
+
+   &PrintfClass saHex(int number);
    
    //set a double argument
    &PrintfClass sa(double num);
@@ -56,6 +62,9 @@ methods:
    &PrintfClass sa(*char str[]);
    
    &PrintfClass sa(char c);
+
+
+
    
    
    &PrintfClass saExp(double num);
@@ -68,6 +77,13 @@ methods:
    void prHex(char x);
    
    PrintfClass();
+};
+
+
+class Umgebung
+{
+methods:
+   static void leseVariable(&String_16 varName,&int erfolg,&String_16 wert);
 };
 
 enum SPRFile_Mode { SF_Readonly, SF_ReadWrite, SF_ReadWriteTruncated };
@@ -103,8 +119,9 @@ methods:
    //write 'count' bytes at position 'pos' into 'buffer'
    //returns the number of bytes actually written
    int write(int pos,int count,&char buffer[]);
-   int write64(longlong pos,int count,&char buffer[]);
    int write(int pos,int count,*char buffer[]);
+
+   int write64(longlong pos,int count,&char buffer[]);
 
    int schreibeAlles(*char buffer[],int stelleEingabe, int stelleAusgabe, int anzahl);
    
